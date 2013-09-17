@@ -4,17 +4,37 @@
  */
 package validasi.form;
 
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.FocusTraversalPolicy;
+import java.awt.Font;
+import java.awt.KeyboardFocusManager;
+import java.awt.Toolkit;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.NumberFormat;
 import java.util.List;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.AbstractCellEditor;
 import javax.swing.AbstractListModel;
 import javax.swing.DefaultListModel;
+import javax.swing.JFormattedTextField;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import javax.swing.event.ListSelectionEvent;
@@ -22,12 +42,16 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellEditor;
+import javax.swing.text.JTextComponent;
 import validasi.SQLiteConnection;
 import validasi.TabelImport;
 import validasi.cek.CekTmstBadanHukum;
 import validasi.cek.CekTmstDosen;
 import validasi.cek.CekTmstFakultas;
 import validasi.cek.CekTmstFasPenunjangAkademik;
+import validasi.cek.CekTmstMataKuliah;
+import validasi.cek.CekTmstPegawai;
 import validasi.komponen.PanelTabel;
 import validasi.utilisasi.ColumnResizer;
 import validasi.utilisasi.ResultSetToDefaultTableModel;
@@ -43,7 +67,10 @@ public class TestValidasi extends javax.swing.JFrame {
     private CekTmstDosen cekTmstDosen = new CekTmstDosen();
     private CekTmstFakultas cekTmstFakultas = new CekTmstFakultas();
     private CekTmstFasPenunjangAkademik cekTmstFasPenunjangAkademik = new CekTmstFasPenunjangAkademik();
+    private CekTmstMataKuliah cekTmstMataKuliah = new CekTmstMataKuliah();
+    private CekTmstPegawai cekTmstPegawai = new CekTmstPegawai();
     private String tab;
+    private MyKeyListener kListener=new MyKeyListener();
 
     /**
      * Creates new form TestValidasi
@@ -76,6 +103,17 @@ public class TestValidasi extends javax.swing.JFrame {
                 }
             }
         });
+//        try {
+//            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+//        } catch (ClassNotFoundException ex) {
+//            Logger.getLogger(TestValidasi.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (InstantiationException ex) {
+//            Logger.getLogger(TestValidasi.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (IllegalAccessException ex) {
+//            Logger.getLogger(TestValidasi.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (UnsupportedLookAndFeelException ex) {
+//            Logger.getLogger(TestValidasi.class.getName()).log(Level.SEVERE, null, ex);
+//        }
     }
 
     private int cekIndexTab(String namaTab) {
@@ -101,11 +139,13 @@ public class TestValidasi extends javax.swing.JFrame {
     private void tambahTabPanel(String namaTabel) {
         try {
             PanelTabel panel = new PanelTabel();
-            JTable tabel = new JTable();
             ResultSet rs = conn.createStatement().executeQuery("select * from " + namaTabel);
             panel.setTableModel(new ResultSetToDefaultTableModel(rs).getModel());
 
             jTabbedPane1.addTab(namaTabel, panel);
+            for(int i=0; i<panel.getTable().getColumnCount(); i++){
+                panel.getTable().getColumnModel().getColumn(i).setCellEditor(new MyTableCellEditor());
+            }
             jTabbedPane1.setSelectedIndex(jTabbedPane1.getTabCount() - 1);
             //repaint();
 
@@ -162,6 +202,10 @@ public class TestValidasi extends javax.swing.JFrame {
                     cekPesan = cekTmstFakultas.cekKolom(baris, namaKolom, rs.getObject(col));
                 } else if (namaTabel.equalsIgnoreCase("TMST_FAS_PENUNJANG_AKADEMIK")) {
                     cekPesan = cekTmstFasPenunjangAkademik.cekKolom(baris, namaKolom, rs.getObject(col));
+                } else if (namaTabel.equalsIgnoreCase("TMST_MATA_KULIAH")) {
+                    cekPesan = cekTmstMataKuliah.cekKolom(baris, namaKolom, rs.getObject(col));
+                } else if (namaTabel.equalsIgnoreCase("TMST_PEGAWAI")) {
+                    cekPesan = cekTmstPegawai.cekKolom(baris, namaKolom, rs.getObject(col));
                 }
                 System.out.println("Panjang pesanError :"+pesanError.length);
                 pesanError[baris-1][col-1]=cekPesan.length()> 0? "error": "";
@@ -452,4 +496,194 @@ public class TestValidasi extends javax.swing.JFrame {
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JTable jTable1;
     // End of variables declaration//GEN-END:variables
+
+    public class MyTableCellEditor extends AbstractCellEditor implements TableCellEditor {
+
+        private Toolkit toolkit;
+        JTextComponent text = new JTextField() {
+
+//            @Override
+//            public void setFont(Font f) {
+//                super.setFont(new java.awt.Font("Tahoma", Font.BOLD, 11)); // NOI18N
+//            }
+            
+            protected boolean processKeyBinding(final KeyStroke ks, final KeyEvent e, final int condition, final boolean pressed) {
+                if (hasFocus()) {
+                    return super.processKeyBinding(ks, e, condition, pressed);
+                } else {
+                    this.requestFocus();
+
+                    SwingUtilities.invokeLater(new Runnable() {
+                        public void run() {
+                            processKeyBinding(ks, e, condition, pressed);
+                        }
+                    });
+                    return true;
+                }
+            }
+        };
+        ;
+
+        int col, row;
+        private NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
+
+        public Component getTableCellEditorComponent(JTable table, Object value,
+                boolean isSelected, int rowIndex, int vColIndex) {
+            col = vColIndex;
+            row = rowIndex;
+            text.setBackground(new Color(0, 255, 204));
+            text.addFocusListener(txtFocusListener);
+            text.addKeyListener(kListener);
+            text.setFont(table.getFont());
+            text.setName("textEditor");
+            text.removeKeyListener(kListener);
+//           AbstractDocument doc = (AbstractDocument)text.getDocument();
+//           doc.setDocumentFilter(null);
+//           doc.setDocumentFilter(new FixedSizeFilter(iText));
+
+            text.removeKeyListener(kListener);
+            text.addKeyListener(kListener);
+
+            if (isSelected) {
+            }
+            text.setText(value == null ? "" : value.toString());
+            return text;
+        }
+
+        public Object getCellEditorValue() {
+            Object retVal = 0;
+            try {
+                retVal = ((JTextField) text).getText();
+                return retVal;
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                toolkit.beep();
+                retVal = 0;
+            }
+            return retVal;
+        }
+        
+    }
+    
+    public class MyKeyListener extends KeyAdapter {
+        @Override
+        public void keyTyped(java.awt.event.KeyEvent evt) {
+            
+//            if(getTableSource()==null)
+//                return;
+            
+//            if (evt.getSource() instanceof JTextField &&
+//              ((JTextField)evt.getSource()).getName()!=null &&
+//              ((JTextField)evt.getSource()).getName().equalsIgnoreCase("textEditor")) {
+//                fn.keyTyped(evt);
+//
+//           }
+
+        }
+        
+        public void keyPressed(KeyEvent evt) {
+            Component ct = KeyboardFocusManager.getCurrentKeyboardFocusManager().getPermanentFocusOwner();
+            int keyKode = evt.getKeyCode();
+            switch(keyKode){
+               case KeyEvent.VK_ENTER : {
+                    if(!(ct instanceof JTable))                    {
+                            Component c = findNextFocus();
+                            if (c==null) return;
+                            c.requestFocus();
+                    }
+                    break;
+                }
+                case KeyEvent.VK_DOWN: {
+                    if(!(ct instanceof JTable))
+                        {
+                                Component c = findNextFocus();
+                                if (c==null) return;
+                                c.requestFocus();
+                            break;
+                    }
+                }
+
+                case KeyEvent.VK_UP: {
+                    if(!(evt.getSource() instanceof JTable)){
+                        Component c = findPrevFocus();
+                        c.requestFocus();
+                    }
+                    break;
+                }
+//                case KeyEvent.VK_F4:{
+//                    udfClear();
+//                    break;
+//                }
+//                case KeyEvent.VK_F5:{
+//                    udfSave();
+//                    
+//                    break;
+//                }
+                case KeyEvent.VK_ESCAPE:{
+                    dispose();
+                    break;
+                }
+                
+            }
+        }
+
+//        @Override
+//        public void keyReleased(KeyEvent evt){
+//            if(evt.getSource().equals(txtDisc)||evt.getSource().equals(txtQty)||evt.getSource().equals(txtUnitPrice))
+//                GeneralFunction.keyTyped(evt);
+//        }
+
+        public Component findNextFocus() {
+            // Find focus owner
+            Component c = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+            Container root = c == null ? null : c.getFocusCycleRootAncestor();
+
+            if (root != null) {
+                FocusTraversalPolicy policy = root.getFocusTraversalPolicy();
+                Component nextFocus = policy.getComponentAfter(root, c);
+                if (nextFocus == null) {
+                    nextFocus = policy.getDefaultComponent(root);
+                }
+                return nextFocus;
+            }
+            return null;
+        }
+
+        public Component findPrevFocus() {
+            // Find focus owner
+            Component c = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+            Container root = c == null ? null : c.getFocusCycleRootAncestor();
+
+            if (root != null) {
+                FocusTraversalPolicy policy = root.getFocusTraversalPolicy();
+                Component prevFocus = policy.getComponentBefore(root, c);
+                if (prevFocus == null) {
+                    prevFocus = policy.getDefaultComponent(root);
+                }
+                return prevFocus;
+            }
+            return null;
+        }
+    }
+    
+    private FocusListener txtFocusListener=new FocusListener() {
+        public void focusGained(FocusEvent e) {
+            if(e.getSource() instanceof JTextField || e.getSource() instanceof JFormattedTextField){
+                ((JTextField)e.getSource()).setBackground(Color.CYAN);
+                if( (e.getSource() instanceof JTextField && ((JTextField)e.getSource()).getName()!=null && ((JTextField)e.getSource()).getName().equalsIgnoreCase("textEditor"))){
+                    ((JTextField)e.getSource()).setSelectionStart(0);
+                    ((JTextField)e.getSource()).setSelectionEnd(((JTextField)e.getSource()).getText().length());
+
+                }
+            }
+        }
+
+
+        public void focusLost(FocusEvent e) {
+            if(e.getSource().getClass().getSimpleName().equalsIgnoreCase("JTextField")||
+                    e.getSource().getClass().getSimpleName().equalsIgnoreCase("JFormattedTextField")){
+                ((JTextField)e.getSource()).setBackground(Color.WHITE);
+           }
+        }
+    } ;
 }

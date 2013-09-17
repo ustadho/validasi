@@ -31,6 +31,7 @@ public class PanelTabel extends javax.swing.JPanel {
         jTable1.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         jTable1.getTableHeader().setReorderingAllowed(false);
         jTable1.setCellSelectionEnabled(true);
+        jTable1.setRowHeight(22);
     }
 
     public void setTableModel(DefaultTableModel model) {
