@@ -4,6 +4,8 @@
  */
 package validasi.utilisasi;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -13,7 +15,10 @@ import java.util.Date;
  * @author faheem
  */
 public class Function {
-
+    public static NumberFormat dFmt=new DecimalFormat("#,##0.00");
+    public static NumberFormat intFmt=new DecimalFormat("#,##0");
+    public static NumberFormat fFmt=new DecimalFormat("#,##0.00");
+    
     public boolean validateDate(String dateStr, boolean allowPast, String formatStr) {
         if (formatStr == null) {
             return false; // or throw some kinda exception, possibly a InvalidArgumentException
@@ -57,4 +62,108 @@ public class Function {
         }
         return message;
     }
+    
+    public static double udfGetDouble(String sNum){
+        double hsl=0;
+        if(!sNum.trim().equalsIgnoreCase("")){
+            try{
+                hsl=dFmt.parse(sNum).doubleValue();
+                //hsl=Double.parseDouble(sNum);
+            } catch (java.text.ParseException ex) {
+                hsl=0;
+                //Logger.getLogger(FrmTrxPinjam.class.getName()).log(Level.SEVERE, null, ex);
+            }catch(NumberFormatException ne){
+                hsl=0;
+            }catch(IllegalArgumentException i){
+                hsl=0;
+            }
+        }
+        return hsl;
+  }
+    public static double udfGetDouble(Object sNum){
+        double hsl=0;
+        if(sNum!=null && !sNum.toString().trim().equalsIgnoreCase("")){
+            try{
+                hsl=dFmt.parse(dFmt.format(sNum)).doubleValue();
+            } catch (java.text.ParseException ex) {
+                hsl=0;
+            }catch(NumberFormatException ne){
+                hsl=0;
+            }catch(IllegalArgumentException i){
+                hsl=0;
+            }
+        }
+        return hsl;
+  }
+
+
+    public static float udfGetFloat(String sNum){
+        float hsl=0;
+        if(!sNum.trim().equalsIgnoreCase("")){
+            try{
+                hsl=fFmt.parse(sNum).floatValue();
+            } catch (java.text.ParseException ex) {
+                hsl=0;
+            }catch(NumberFormatException ne){
+                hsl=0;
+            }catch(IllegalArgumentException i){
+                hsl=0;
+            }
+        }
+        return hsl;
+  }
+
+    public static float udfGetFloat(Object sNum){
+        float hsl=0;
+        if(sNum!=null && !sNum.toString().trim().equalsIgnoreCase("")){
+            try{
+                hsl=fFmt.parse(fFmt.format(sNum)).floatValue();
+            } catch (java.text.ParseException ex) {
+                hsl=0;
+            }catch(NumberFormatException ne){
+                hsl=0;
+            }catch(IllegalArgumentException i){
+                hsl=0;
+            }
+        }
+        return hsl;
+  }
+
+    public static int udfGetInt(String sNum){
+        int hsl=0;
+        if(!sNum.trim().equalsIgnoreCase("")){
+            try{
+                //hsl=Integer.valueOf(sNum);
+                hsl=intFmt.parse(sNum).intValue();
+
+            } catch (java.text.ParseException ex) {
+                hsl=0;
+                //Logger.getLogger(FrmTrxPinjam.class.getName()).log(Level.SEVERE, null, ex);
+            }catch(NumberFormatException ne){
+                hsl=0;
+            }catch(IllegalArgumentException i){
+                hsl=0;
+            }
+        }
+        return hsl;
+  }
+
+    public static int udfGetInt(Object sNum){
+        int hsl=0;
+        if(sNum!=null && !sNum.toString().trim().equalsIgnoreCase("")){
+            try{
+                if(sNum instanceof String)
+                    hsl=Integer.parseInt(sNum.toString());
+                else
+                    hsl=intFmt.parse(intFmt.format(sNum)).intValue();
+            } catch (java.text.ParseException ex) {
+                hsl=0;
+            }catch(NumberFormatException ne){
+                hsl=0;
+            }catch(IllegalArgumentException i){
+                hsl=0;
+            }
+        }
+        return hsl;
+  }
 }

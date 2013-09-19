@@ -8,7 +8,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.FocusTraversalPolicy;
-import java.awt.Font;
 import java.awt.KeyboardFocusManager;
 import java.awt.Toolkit;
 import java.awt.event.FocusEvent;
@@ -24,21 +23,14 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractCellEditor;
-import javax.swing.AbstractListModel;
-import javax.swing.DefaultListModel;
 import javax.swing.JFormattedTextField;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
@@ -52,6 +44,7 @@ import validasi.cek.CekTmstFakultas;
 import validasi.cek.CekTmstFasPenunjangAkademik;
 import validasi.cek.CekTmstMataKuliah;
 import validasi.cek.CekTmstPegawai;
+import validasi.cek.CekTmstPerguruanTinggi;
 import validasi.komponen.PanelTabel;
 import validasi.utilisasi.ColumnResizer;
 import validasi.utilisasi.ResultSetToDefaultTableModel;
@@ -69,6 +62,7 @@ public class TestValidasi extends javax.swing.JFrame {
     private CekTmstFasPenunjangAkademik cekTmstFasPenunjangAkademik = new CekTmstFasPenunjangAkademik();
     private CekTmstMataKuliah cekTmstMataKuliah = new CekTmstMataKuliah();
     private CekTmstPegawai cekTmstPegawai = new CekTmstPegawai();
+    private CekTmstPerguruanTinggi cekTmstPerguruanTinggi =new CekTmstPerguruanTinggi();
     private String tab;
     private MyKeyListener kListener=new MyKeyListener();
 
@@ -206,6 +200,8 @@ public class TestValidasi extends javax.swing.JFrame {
                     cekPesan = cekTmstMataKuliah.cekKolom(baris, namaKolom, rs.getObject(col));
                 } else if (namaTabel.equalsIgnoreCase("TMST_PEGAWAI")) {
                     cekPesan = cekTmstPegawai.cekKolom(baris, namaKolom, rs.getObject(col));
+                } else if (namaTabel.equalsIgnoreCase("TMST_PERGURUAN_TINGGI")) {
+                    cekPesan = cekTmstPerguruanTinggi.cekKolom(baris, namaKolom, rs.getObject(col));
                 }
                 System.out.println("Panjang pesanError :"+pesanError.length);
                 pesanError[baris-1][col-1]=cekPesan.length()> 0? "error": "";
