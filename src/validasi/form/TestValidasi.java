@@ -7,6 +7,7 @@ package validasi.form;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Cursor;
 import java.awt.FocusTraversalPolicy;
 import java.awt.KeyboardFocusManager;
 import java.awt.Toolkit;
@@ -45,6 +46,9 @@ import validasi.cek.CekTmstFasPenunjangAkademik;
 import validasi.cek.CekTmstMataKuliah;
 import validasi.cek.CekTmstPegawai;
 import validasi.cek.CekTmstPerguruanTinggi;
+import validasi.cek.CekTmstProgramStudi;
+import validasi.cek.CekTmstPustakaPT;
+import validasi.cek.CekTmstSaranaPT;
 import validasi.komponen.PanelTabel;
 import validasi.utilisasi.ColumnResizer;
 import validasi.utilisasi.ResultSetToDefaultTableModel;
@@ -63,6 +67,9 @@ public class TestValidasi extends javax.swing.JFrame {
     private CekTmstMataKuliah cekTmstMataKuliah = new CekTmstMataKuliah();
     private CekTmstPegawai cekTmstPegawai = new CekTmstPegawai();
     private CekTmstPerguruanTinggi cekTmstPerguruanTinggi =new CekTmstPerguruanTinggi();
+    private CekTmstProgramStudi cekTmstProgramStudi =new CekTmstProgramStudi();
+    private CekTmstPustakaPT cekTmstPustakaPT =new CekTmstPustakaPT();
+    private CekTmstSaranaPT cekTmstSaranaPT =new CekTmstSaranaPT();
     private String tab;
     private MyKeyListener kListener=new MyKeyListener();
 
@@ -135,8 +142,10 @@ public class TestValidasi extends javax.swing.JFrame {
             PanelTabel panel = new PanelTabel();
             ResultSet rs = conn.createStatement().executeQuery("select * from " + namaTabel);
             panel.setTableModel(new ResultSetToDefaultTableModel(rs).getModel());
-
+            panel.setNamaTabelDb(namaTabel);
+            panel.setConn(conn);
             jTabbedPane1.addTab(namaTabel, panel);
+            
             for(int i=0; i<panel.getTable().getColumnCount(); i++){
                 panel.getTable().getColumnModel().getColumn(i).setCellEditor(new MyTableCellEditor());
             }
@@ -154,7 +163,7 @@ public class TestValidasi extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(this, "Tidak ada data yang akan divalidasi!");
             }
             String message = "<html>";
-
+            this.setCursor(new Cursor(Cursor.WAIT_CURSOR));
 //            message += cekTabel("TMST_BADAN_HUKUM");
 //            message += cekTabel("TMST_DOSEN");
 //            message += cekTabel("TMST_FAKULTAS");
@@ -166,7 +175,10 @@ public class TestValidasi extends javax.swing.JFrame {
             message += "</html>";
             System.out.println("Message : " + message);
             jEditorPane1.setText(message);
+            jEditorPane1.setCaretPosition(0);
+            this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
         } catch (SQLException ex) {
+            this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
             Logger.getLogger(TestValidasi.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -174,7 +186,7 @@ public class TestValidasi extends javax.swing.JFrame {
     private String cekTabel(String namaTabel) throws SQLException {
 //        StatusValidasi statusValidasi=new StatusValidasi();
         String pesanAwal = "Tabel : <b>" + namaTabel + "</b> <br>";
-        String [][] pesanError=new String[100000][100];
+        String [][] pesanError=new String[10000][100];
 //        pesanError[0][1]="";
         String pesan = "";
         String cekPesan = "";
@@ -202,6 +214,12 @@ public class TestValidasi extends javax.swing.JFrame {
                     cekPesan = cekTmstPegawai.cekKolom(baris, namaKolom, rs.getObject(col));
                 } else if (namaTabel.equalsIgnoreCase("TMST_PERGURUAN_TINGGI")) {
                     cekPesan = cekTmstPerguruanTinggi.cekKolom(baris, namaKolom, rs.getObject(col));
+                } else if (namaTabel.equalsIgnoreCase("TMST_PROGRAM_STUDI")) {
+                    cekPesan = cekTmstProgramStudi.cekKolom(baris, namaKolom, rs.getObject(col));
+                } else if (namaTabel.equalsIgnoreCase("TMST_PUSTAKA_PT")) {
+                    cekPesan = cekTmstPustakaPT.cekKolom(baris, namaKolom, rs.getObject(col));
+                } else if (namaTabel.equalsIgnoreCase("TMST_SARANA_PT")) {
+                    cekPesan = cekTmstSaranaPT.cekKolom(baris, namaKolom, rs.getObject(col));
                 }
                 System.out.println("Panjang pesanError :"+pesanError.length);
                 pesanError[baris-1][col-1]=cekPesan.length()> 0? "error": "";
@@ -395,17 +413,17 @@ public class TestValidasi extends javax.swing.JFrame {
                         .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGap(14, 14, 14))
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, 265, Short.MAX_VALUE)
+                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 328, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jButton1)
                             .addComponent(jLabel1))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 116, Short.MAX_VALUE)
                         .addContainerGap())))
         );
 
-        setBounds(0, 0, 764, 470);
+        setBounds(0, 0, 1108, 533);
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
@@ -521,6 +539,7 @@ public class TestValidasi extends javax.swing.JFrame {
         ;
 
         int col, row;
+        
         private NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
 
         public Component getTableCellEditorComponent(JTable table, Object value,
@@ -550,6 +569,15 @@ public class TestValidasi extends javax.swing.JFrame {
             Object retVal = 0;
             try {
                 retVal = ((JTextField) text).getText();
+                int col=((PanelTabel)jTabbedPane1.getComponentAt(jTabbedPane1.getSelectedIndex())).getTable().getSelectedColumn();
+                String namaTable=((PanelTabel) jTabbedPane1.getComponentAt(jTabbedPane1.getSelectedIndex())).getNamaTabel();
+                String namaKolom= ((PanelTabel)jTabbedPane1.getComponentAt(jTabbedPane1.getSelectedIndex()))
+                        .getTable().getColumnName(col);
+                System.out.println("Update "+namaTable+" set "+namaKolom+"= " +
+                            (retVal instanceof Number || retVal instanceof Double || retVal instanceof Integer? 
+                            retVal: "'"+retVal.toString()+"' "
+                            + "whereee  ??????") );
+                //table
                 return retVal;
             } catch (Exception e) {
                 System.out.println(e.getMessage());

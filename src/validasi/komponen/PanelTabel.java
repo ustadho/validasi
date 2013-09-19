@@ -2,13 +2,17 @@ package validasi.komponen;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.sql.Connection;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.swing.JTable;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import validasi.utilisasi.ColumnResizer;
+import validasi.utilisasi.Function;
 
 /*
  * To change this template, choose Tools | Templates
@@ -19,9 +23,11 @@ import validasi.utilisasi.ColumnResizer;
  * @author faheem
  */
 public class PanelTabel extends javax.swing.JPanel {
-
+    private Connection conn;
     ColumnResizer colResizer = new ColumnResizer();
     private String[][] pesanErrors;
+    private String namaTabelDb="";
+    private Function fn=new Function();
 
     /**
      * Creates new form PanelTabel
@@ -32,6 +38,22 @@ public class PanelTabel extends javax.swing.JPanel {
         jTable1.getTableHeader().setReorderingAllowed(false);
         jTable1.setCellSelectionEnabled(true);
         jTable1.setRowHeight(22);
+//        jTable1.getModel().addTableModelListener(new TableModelListener() {
+//
+//            @Override
+//            public void tableChanged(TableModelEvent e) {
+//                System.out.println("Conn "+conn);
+//                if(e.getType()==TableModelEvent.UPDATE && conn!=null){
+//                    String namaKolom=jTable1.getColumnName(e.getColumn());
+//                    Object value=jTable1.getValueAt(e.getColumn(), jTable1.getSelectedRow());
+//                    
+//                    System.out.println("Update "+namaTabelDb+" set "+namaKolom+"= " +
+//                            (value instanceof Number || value instanceof Double || value instanceof Integer? 
+//                            fn.udfGetDouble(value): "'"+value.toString()+"' "
+//                            + "whereee  ??????") );
+//                }
+//            }
+//        });
     }
 
     public void setTableModel(DefaultTableModel model) {
@@ -40,6 +62,10 @@ public class PanelTabel extends javax.swing.JPanel {
             colResizer.autoResizeColWidth(jTable1);
         }
     }
+    
+    public void setConn(Connection c){
+        this.conn=c;
+    }
 
     public JTable getTable() {
         return jTable1;
@@ -47,6 +73,14 @@ public class PanelTabel extends javax.swing.JPanel {
 
     public int getColumnIndex(String namaKolom) {
         return jTable1.getColumnModel().getColumnIndex(namaKolom);
+    }
+    
+    public void setNamaTabelDb(String s){
+        this.namaTabelDb=s;
+    }
+
+    public String getNamaTabel() {
+        return namaTabelDb;
     }
 
     class MyRowRender extends DefaultTableCellRenderer implements TableCellRenderer {

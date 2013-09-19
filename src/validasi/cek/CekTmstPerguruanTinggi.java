@@ -20,29 +20,32 @@ public class CekTmstPerguruanTinggi {
             message = " Kolom '" + sKolom + "' Wajib diisi! ";
             return message;
         }
-        if (sKolom.equalsIgnoreCase("KODE_PERGURUAN_TINGGI") && (value == null || value.toString().equalsIgnoreCase(""))) {
-            return " Kolom '" + sKolom + "' Wajib diisi! ";
+        if (sKolom.equalsIgnoreCase("KODE_PERGURUAN_TINGGI") ){
+            if(value == null || value.toString().equalsIgnoreCase("")){
+                return " Kolom '" + sKolom + "' Wajib diisi! ";
 
-        } else {
-            if (value.toString().length() > 6) {
-                return " Kolom '" + sKolom + "' Maksimal diisi dengan 6 karakter! ";
             } else {
-                String substr = value.toString().substring(0, 2);
+                if (value.toString().length() !=6) {
+                    return " Kolom '" + sKolom + "' Harus diisi dengan 6 karankter! ";
+                } else {
+                    System.out.println("cek PERGURUAN_TINGGI kolom KODE_PERGURUAN_TINGGI: "+value.toString());
+                    String substr = value.toString().substring(0, 2);
 
-                if (!(substr.equalsIgnoreCase("00") || substr.equalsIgnoreCase("01")
-                        || substr.equalsIgnoreCase("02") || substr.equalsIgnoreCase("03")
-                        || substr.equalsIgnoreCase("04") || substr.equalsIgnoreCase("05")
-                        || substr.equalsIgnoreCase("06") || substr.equalsIgnoreCase("06")
-                        || substr.equalsIgnoreCase("08") || substr.equalsIgnoreCase("09")
-                        || substr.equalsIgnoreCase("10") || substr.equalsIgnoreCase("11")
-                        || substr.equalsIgnoreCase("12"))) {
-                    return "Dua digit pertama menyatakan kode wilayah Kopertis, 01, 02 ... 12, untuk PTN dipakai “00” ";
-                }
-                substr = value.toString().substring(2, 3);
-                if (!(substr.equalsIgnoreCase("1") || substr.equalsIgnoreCase("2") || substr.equalsIgnoreCase("3")
-                        || substr.equalsIgnoreCase("4") || substr.equalsIgnoreCase("5"))) {
-                    return "Digit ketiga menyatakan jenis perguruan tinggi (1-universitas, 2-institut, "
-                            + "3-sekolah tinggi, 4-akademi, 5-politeknik);";
+                    if (!(substr.equalsIgnoreCase("00") || substr.equalsIgnoreCase("01")
+                            || substr.equalsIgnoreCase("02") || substr.equalsIgnoreCase("03")
+                            || substr.equalsIgnoreCase("04") || substr.equalsIgnoreCase("05")
+                            || substr.equalsIgnoreCase("06") || substr.equalsIgnoreCase("06")
+                            || substr.equalsIgnoreCase("08") || substr.equalsIgnoreCase("09")
+                            || substr.equalsIgnoreCase("10") || substr.equalsIgnoreCase("11")
+                            || substr.equalsIgnoreCase("12"))) {
+                        return "Dua digit pertama menyatakan kode wilayah Kopertis, 01, 02 ... 12, untuk PTN dipakai “00” ";
+                    }
+                    substr = value.toString().substring(2, 3);
+                    if (!(substr.equalsIgnoreCase("1") || substr.equalsIgnoreCase("2") || substr.equalsIgnoreCase("3")
+                            || substr.equalsIgnoreCase("4") || substr.equalsIgnoreCase("5"))) {
+                        return "Digit ketiga menyatakan jenis perguruan tinggi (1-universitas, 2-institut, "
+                                + "3-sekolah tinggi, 4-akademi, 5-politeknik);";
+                    }
                 }
             }
         }

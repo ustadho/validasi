@@ -78,8 +78,27 @@ public class CekTmstProgramStudi {
                 return message;
             }
         }
-//        ,Mulai_semester CHAR(5 ) NULL ,
-//	NIDN_NUP CHAR(40 ) NULL ,
+        if (sKolom.equalsIgnoreCase("Mulai_semester")){
+            if(value == null || value.toString().equalsIgnoreCase("")){
+                message = " Kolom '" + sKolom + "' Wajib diisi! ";
+                return message;
+            }else if(value.toString().trim().length()<5){
+                message = " Kolom '" + sKolom + "' Diisi dengan 5 Karakter YYYYS (Tahun-Semester)";
+                return message;
+            }else if(value.toString().equalsIgnoreCase("H")){
+                return "";
+            }else if(!(value.toString().substring(4, 5).equalsIgnoreCase("1") || value.toString().substring(4, 5).equalsIgnoreCase("2"))){
+                message = " Kolom '" + sKolom + "' karaker ke-5 harus diisi dengan angka 1 atau 2";
+                return message;
+            }
+        }
+//        Nomor SK DIKTI
+//        Tanggal SK DIKTI
+//        Tanggal akhir SK DIKTI
+
+//        if (sKolom.equalsIgnoreCase("NIDN_NUP") && fn.udfGetInt(value)==0) {
+//            return "Baris ke : " + baris + " Kolom '" + sKolom + "' Wajib diisi!";
+//        }
 //	NIK CHAR(20 ) NULL ,
 //	HP CHAR(20 ) NULL ,
 //	Telepon_kantor CHAR(20 ) NULL ,
@@ -87,10 +106,24 @@ public class CekTmstProgramStudi {
 //	Nama_operator CHAR(40 ) NULL,
 //	Frekuensi_kurikulum CHAR(1 ) NULL,
 //	Pelaksanaan_kurikulum CHAR(1 ) NULL,
-//	Kode_akreditasi NUMBER NULL,
-//	No_SK_BAN CHAR(50 ) NULL 
-//        ,Tanggal_SK_BAN DATE NULL ,
-//	Tanggil_akhir_SK_BAN DATE NULL ,
+        if (sKolom.equalsIgnoreCase("Kode_akreditasi") && fn.udfGetInt(value)==0) {
+            return "Baris ke : " + baris + " Kolom '" + sKolom + "' Wajib diisi!";
+        }
+        if (sKolom.equalsIgnoreCase("No_SK_BAN") && fn.udfGetInt(value)==0) {
+            return "Baris ke : " + baris + " Kolom '" + sKolom + "' Wajib diisi!";
+        }
+        if (sKolom.equalsIgnoreCase("Tanggal_SK_BAN")) {
+            message = fn.cekKolomTanggal(baris, sKolom, value);
+            if (message.length() > 0) {
+                return message;
+            }
+        }
+        if (sKolom.equalsIgnoreCase("Tanggil_akhir_SK_BAN")) {
+            message = fn.cekKolomTanggal(baris, sKolom, value);
+            if (message.length() > 0) {
+                return message;
+            }
+        }
 //	kapasitas_mahasiswa NUMBER NULL ,
 //	Visi CLOB NULL ,
 //	Misi CLOB NULL ,
@@ -99,9 +132,21 @@ public class CekTmstProgramStudi {
 //	Upaya_penyebaran CLOB NULL ,
 //	Keberlanjutan CLOB NULL ,
 //	Himpunan_alumni CLOB NULL ,
-//	Tgl_mulai_efektif DATE NULL 
-//        ,Tgl_akhir_efektif DATE NULL ,
-//	Status_validasi NUMBER(1) NULL ,
+        if (sKolom.equalsIgnoreCase("Tgl_mulai_efektif")) {
+            message = fn.cekKolomTanggal(baris, sKolom, value);
+            if (message.length() > 0) {
+                return message;
+            }
+        }
+        if (sKolom.equalsIgnoreCase("Tgl_akhir_efektif")) {
+            message = fn.cekKolomTanggal(baris, sKolom, value);
+            if (message.length() > 0) {
+                return message;
+            }
+        }
+        if (sKolom.equalsIgnoreCase("Status_validasi") && fn.udfGetInt(value)==0) {
+            return "Baris ke : " + baris + " Kolom '" + sKolom + "' Wajib diisi!";
+        }
 //	ID_log_audit NUMBER NULL,
 //	UUID INT,
 //	Nama_Ketua TEXT
