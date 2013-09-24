@@ -43,6 +43,10 @@ import validasi.cek.CekTmstBadanHukum;
 import validasi.cek.CekTmstDosen;
 import validasi.cek.CekTmstFakultas;
 import validasi.cek.CekTmstFasPenunjangAkademik;
+import validasi.cek.CekTmstJurusan;
+import validasi.cek.CekTmstKerjasamaPTLN;
+import validasi.cek.CekTmstLaboratorium;
+import validasi.cek.CekTmstMahasiswa;
 import validasi.cek.CekTmstMataKuliah;
 import validasi.cek.CekTmstPegawai;
 import validasi.cek.CekTmstPerguruanTinggi;
@@ -70,6 +74,11 @@ public class TestValidasi extends javax.swing.JFrame {
     private CekTmstProgramStudi cekTmstProgramStudi =new CekTmstProgramStudi();
     private CekTmstPustakaPT cekTmstPustakaPT =new CekTmstPustakaPT();
     private CekTmstSaranaPT cekTmstSaranaPT =new CekTmstSaranaPT();
+    
+    private CekTmstJurusan cekTmstJurusan = new CekTmstJurusan();
+    private CekTmstKerjasamaPTLN cekTmstKerjasamaPTLN = new CekTmstKerjasamaPTLN();
+    private CekTmstLaboratorium cekTmstLaboratorium = new CekTmstLaboratorium();
+    private CekTmstMahasiswa cekTmstMahasiswa = new CekTmstMahasiswa();
     private String tab;
     private MyKeyListener kListener=new MyKeyListener();
 
@@ -220,6 +229,14 @@ public class TestValidasi extends javax.swing.JFrame {
                     cekPesan = cekTmstPustakaPT.cekKolom(baris, namaKolom, rs.getObject(col));
                 } else if (namaTabel.equalsIgnoreCase("TMST_SARANA_PT")) {
                     cekPesan = cekTmstSaranaPT.cekKolom(baris, namaKolom, rs.getObject(col));
+                }  else if (namaTabel.equalsIgnoreCase("TMST_JURUSAN")) {
+                    cekPesan = cekTmstJurusan.cekKolom(baris, namaKolom, rs.getObject(col));
+                } else if (namaTabel.equalsIgnoreCase("TMST_KERJASAMA_PT_LN")) {
+                    cekPesan = cekTmstKerjasamaPTLN.cekKolom(baris, namaKolom, rs.getObject(col));
+                } else if (namaTabel.equalsIgnoreCase("TMST_LABORATORIUM")) {
+                    cekPesan = cekTmstLaboratorium.cekKolom(baris, namaKolom, rs.getObject(col));
+                } else if (namaTabel.equalsIgnoreCase("TMST_MAHASISWA")) {
+                    cekPesan = cekTmstMahasiswa.cekKolom(baris, namaKolom, rs.getObject(col));
                 }
                 System.out.println("Panjang pesanError :"+pesanError.length);
                 pesanError[baris-1][col-1]=cekPesan.length()> 0? "error": "";
