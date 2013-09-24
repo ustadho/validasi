@@ -33,6 +33,8 @@ public class TabelImport {
         lst.add("TMST_USERNAME");
         lst.add("TMST_SMS");
         lst.add("TMST_SMS_PRODI");
+        lst.add("TRAN_AKTIVITAS_MENGAJAR_DOSEN");
+        lst.add("TRAN_ANGGOTA_PENELITI_AHLI");
 
         return lst;
     }
