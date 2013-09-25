@@ -51,10 +51,23 @@ public class SettingTableKey extends javax.swing.JFrame {
         });
     }
 
-    private void addTableKey(String k){
+    private void addColumn(String k){
         try{
             int i=conn.createStatement().executeUpdate("insert into c_table_key (table_name, column_name) "
                     + "values('"+cmbTable.getSelectedItem().toString()+"', '"+k+"')");
+            if(i>0){
+                showTableKey(k);
+            }
+        }catch(SQLException se){
+            JOptionPane.showMessageDialog(this, se.getMessage());
+        }
+    }
+    
+    private void removeColumn(String k){
+        try{
+            int i=conn.createStatement().executeUpdate("delete from c_table_key "
+                    + "where table_name='"+cmbTable.getSelectedItem().toString()+"' "
+                    + "and column_name='"+k+"' ");
             if(i>0){
                 showTableKey(k);
             }
@@ -147,6 +160,11 @@ public class SettingTableKey extends javax.swing.JFrame {
 
         btnLeft.setText("<");
         btnLeft.setEnabled(false);
+        btnLeft.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLeftActionPerformed(evt);
+            }
+        });
         getContentPane().add(btnLeft, new org.netbeans.lib.awtextra.AbsoluteConstraints(285, 175, 45, -1));
 
         btnRight.setText(">");
@@ -168,27 +186,14 @@ public class SettingTableKey extends javax.swing.JFrame {
     private void cmbTableItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cmbTableItemStateChanged
         if(cmbTable.getSelectedIndex()<0)
             return;
-        try{
-            ResultSet rs=conn.createStatement().executeQuery("select * from "+cmbTable.getSelectedItem().toString());
-            DefaultListModel defModel = new DefaultListModel();
-            for(int i=0; i<rs.getMetaData().getColumnCount(); i++){
-                defModel.addElement(rs.getMetaData().getColumnName(i+1));
-            }
-            jList1.setModel(defModel);
-            showTableKey("");
-            if(jList1.getModel().getSize()>0){
-                jList1.setSelectedIndex(0);
-            }
-        }catch(SQLException se){
-            JOptionPane.showMessageDialog(this, se.getMessage());
-        }
+        showTableColumn("");
     }//GEN-LAST:event_cmbTableItemStateChanged
 
     private void btnRightActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRightActionPerformed
         int iRow=jList1.getSelectedIndex();
         String colName=((DefaultListModel)jList1.getModel()).get(iRow).toString();
         ((DefaultListModel)jList2.getModel()).addElement(colName);
-        addTableKey(colName);
+        addColumn(colName);
         ((DefaultListModel)jList1.getModel()).remove(iRow);
         if(iRow < jList1.getModel().getSize()){
             jList1.setSelectedIndex(iRow);
@@ -199,6 +204,13 @@ public class SettingTableKey extends javax.swing.JFrame {
         }
         jList2.setSelectedIndex(jList2.getModel().getSize()-1);
     }//GEN-LAST:event_btnRightActionPerformed
+
+    private void btnLeftActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLeftActionPerformed
+        int iRow=jList2.getSelectedIndex();
+        String colName=((DefaultListModel)jList1.getModel()).get(iRow).toString();
+        ((DefaultListModel)jList2.getModel()).addElement(colName);
+        removeColumn(colName);
+    }//GEN-LAST:event_btnLeftActionPerformed
 
     /**
      * @param args the command line arguments
@@ -246,4 +258,25 @@ public class SettingTableKey extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     // End of variables declaration//GEN-END:variables
+
+    private void showTableColumn(String string) {
+        try{
+            int j=0;
+            ResultSet rs=conn.createStatement().executeQuery("select * from "+cmbTable.getSelectedItem().toString());
+            DefaultListModel defModel = new DefaultListModel();
+            for(int i=0; i<rs.getMetaData().getColumnCount(); i++){
+                defModel.addElement(rs.getMetaData().getColumnName(i+1));
+                if(rs.getMetaData().getColumnName(i+1).equalsIgnoreCase(string)){
+                    j=i;
+                }
+            }
+            jList1.setModel(defModel);
+            showTableKey("");
+            if(jList1.getModel().getSize()>0){
+                jList1.setSelectedIndex(j);
+            }
+        }catch(SQLException se){
+            JOptionPane.showMessageDialog(this, se.getMessage());
+        }
+    }
 }

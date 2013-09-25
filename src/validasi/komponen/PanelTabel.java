@@ -6,8 +6,6 @@ import java.sql.Connection;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.swing.JTable;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
@@ -38,6 +36,7 @@ public class PanelTabel extends javax.swing.JPanel {
         jTable1.getTableHeader().setReorderingAllowed(false);
         jTable1.setCellSelectionEnabled(true);
         jTable1.setRowHeight(22);
+        jTable1.putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);
 //        jTable1.getModel().addTableModelListener(new TableModelListener() {
 //
 //            @Override

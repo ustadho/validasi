@@ -4,13 +4,16 @@
  */
 package validasi.form;
 
+import java.awt.Cursor;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.sqlite.SQLite;
 import validasi.SQLiteConnection;
+import validasi.komponen.CursorController;
 import validasi.utilisasi.ResultSetToDefaultTableModel;
 
 /**
@@ -18,12 +21,28 @@ import validasi.utilisasi.ResultSetToDefaultTableModel;
  * @author faheem
  */
 public class NewJFrame extends javax.swing.JFrame {
-    Connection conn=new SQLiteConnection().getConn();
+
+    Connection conn = new SQLiteConnection().getConn();
+
     /**
      * Creates new form NewJFrame
      */
     public NewJFrame() {
         initComponents();
+        ActionListener doIt = new ActionListener() {
+            public void actionPerformed(ActionEvent ae) {
+                doIt();
+            }
+        };
+        
+        ActionListener cursorDoIt = CursorController.createListener(this, doIt);
+        button.addActionListener(cursorDoIt);
+    }
+
+    private void doIt() {
+        for (int i = 0; i < 100000000; i++) {
+            System.out.println("I: " + i);
+        }
     }
 
     /**
@@ -40,6 +59,7 @@ public class NewJFrame extends javax.swing.JFrame {
         jButton1 = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
+        button = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -66,6 +86,13 @@ public class NewJFrame extends javax.swing.JFrame {
         jTable1.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
         jScrollPane2.setViewportView(jTable1);
 
+        button.setText("jButton2");
+        button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -75,10 +102,12 @@ public class NewJFrame extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 521, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(button)
+                        .addGap(54, 54, 54)
                         .addComponent(jButton1))
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 585, Short.MAX_VALUE)
                         .addGap(1, 1, 1)))
                 .addContainerGap())
         );
@@ -88,7 +117,9 @@ public class NewJFrame extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton1)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton1)
+                    .addComponent(button))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 275, Short.MAX_VALUE)
                 .addContainerGap())
@@ -99,12 +130,16 @@ public class NewJFrame extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         try {
-            ResultSet rs=conn.createStatement().executeQuery(jTextPane1.getText());
+            ResultSet rs = conn.createStatement().executeQuery(jTextPane1.getText());
             jTable1.setModel(new ResultSetToDefaultTableModel(rs).getModel());
         } catch (SQLException ex) {
             Logger.getLogger(NewJFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonActionPerformed
+        setCursor(new Cursor(Cursor.WAIT_CURSOR));
+    }//GEN-LAST:event_buttonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -141,6 +176,7 @@ public class NewJFrame extends javax.swing.JFrame {
         });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton button;
     private javax.swing.JButton jButton1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;

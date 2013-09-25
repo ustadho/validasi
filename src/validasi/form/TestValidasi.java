@@ -19,6 +19,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.NumberFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
@@ -36,6 +37,7 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableColumnModel;
 import javax.swing.text.JTextComponent;
 import validasi.SQLiteConnection;
 import validasi.TabelImport;
@@ -53,6 +55,7 @@ import validasi.cek.CekTmstPerguruanTinggi;
 import validasi.cek.CekTmstProgramStudi;
 import validasi.cek.CekTmstPustakaPT;
 import validasi.cek.CekTmstSaranaPT;
+import validasi.komponen.InfiniteProgressPanel;
 import validasi.komponen.PanelTabel;
 import validasi.utilisasi.ColumnResizer;
 import validasi.utilisasi.ResultSetToDefaultTableModel;
@@ -62,7 +65,7 @@ import validasi.utilisasi.ResultSetToDefaultTableModel;
  * @author faheem
  */
 public class TestValidasi extends javax.swing.JFrame {
-
+    private InfiniteProgressPanel glassPane;
     private Connection conn;
     private CekTmstBadanHukum cekTmstBadanHukum = new CekTmstBadanHukum();
     private CekTmstDosen cekTmstDosen = new CekTmstDosen();
@@ -87,6 +90,7 @@ public class TestValidasi extends javax.swing.JFrame {
      */
     public TestValidasi() {
         initComponents();
+        
         conn = new SQLiteConnection().getConn();
         jEditorPane1.setEditable(false);
         jEditorPane1.addHyperlinkListener(createHyperLinkListener());
@@ -124,8 +128,40 @@ public class TestValidasi extends javax.swing.JFrame {
 //        } catch (UnsupportedLookAndFeelException ex) {
 //            Logger.getLogger(TestValidasi.class.getName()).log(Level.SEVERE, null, ex);
 //        }
+        glassPane = new InfiniteProgressPanel();
+        this.setGlassPane(glassPane);
+        glassPane.stop();
     }
 
+    private String getUpdateCriteria(){
+        String s="";
+        try{
+            JTable table=((PanelTabel) jTabbedPane1.getComponentAt(jTabbedPane1.getSelectedIndex())).getTable();
+            int iRow=table.getSelectedRow();
+            int iCol=table.getSelectedColumn();
+            TableColumnModel colModel=table.getColumnModel();
+            
+            String namaTable=((PanelTabel) jTabbedPane1.getComponentAt(jTabbedPane1.getSelectedIndex())).getNamaTabel();
+            ResultSet rs=conn.createStatement().executeQuery("select column_name from c_table_key "
+                    + "where table_name='"+namaTable+"' ");
+            
+            String namaKolom="";
+            while(rs.next()){
+                namaKolom=rs.getString("column_name");
+                if(table.getValueAt(iRow, iCol) instanceof String ||table.getValueAt(iRow, iCol) instanceof Date)
+                    s=s.length()>0? " and ": " "+
+                    " "+namaKolom+ "='"+table.getValueAt(iRow, colModel.getColumnIndex(namaKolom)).toString()+"' ";
+                else if(table.getValueAt(iRow, iCol) instanceof Integer || table.getValueAt(iRow, iCol) instanceof Double || table.getValueAt(iRow, iCol) instanceof Float)
+                    s=s.length()>0? " and ": " "+
+                    " "+namaKolom+ "="+table.getValueAt(iRow, colModel.getColumnIndex(namaKolom)).toString()+" ";
+            }
+            return s.length()>0? " where "+s : " ";
+        }catch(SQLException se){
+            JOptionPane.showMessageDialog(this, se.getMessage());
+        }
+        return s;
+    }
+    
     private int cekIndexTab(String namaTab) {
         int k = -1;
         for (int i = 0; i < jTabbedPane1.getTabCount(); i++) {
@@ -172,7 +208,8 @@ public class TestValidasi extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(this, "Tidak ada data yang akan divalidasi!");
             }
             String message = "<html>";
-            this.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+//            this.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+            glassPane.start();
 //            message += cekTabel("TMST_BADAN_HUKUM");
 //            message += cekTabel("TMST_DOSEN");
 //            message += cekTabel("TMST_FAKULTAS");
@@ -185,9 +222,11 @@ public class TestValidasi extends javax.swing.JFrame {
             System.out.println("Message : " + message);
             jEditorPane1.setText(message);
             jEditorPane1.setCaretPosition(0);
-            this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+//            this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+            glassPane.stop();
         } catch (SQLException ex) {
-            this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+            //this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+            glassPane.stop();
             Logger.getLogger(TestValidasi.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -258,7 +297,7 @@ public class TestValidasi extends javax.swing.JFrame {
         if (baris == 0) {
             pesan += "<b>TIDAK ADA DATA di tabel '" + namaTabel + "'</b><br>";
         } else {
-//            pesan += "<br>Jumlah data pada tabel <b>'"+namaTabel+"'</b> : <b>"+baris+ "</b>"+(panjang==0? "Tidak ada kesalahan data": "")+"<br>";
+            pesan += "<br>Jumlah data pada tabel <b>'"+namaTabel+"'</b> : <b>"+baris+ "</b>"+(panjang==0? "\nTidak ada kesalahan data": "")+"<br>";
         }
 
         rs.close();
@@ -590,10 +629,19 @@ public class TestValidasi extends javax.swing.JFrame {
                 String namaTable=((PanelTabel) jTabbedPane1.getComponentAt(jTabbedPane1.getSelectedIndex())).getNamaTabel();
                 String namaKolom= ((PanelTabel)jTabbedPane1.getComponentAt(jTabbedPane1.getSelectedIndex()))
                         .getTable().getColumnName(col);
-                System.out.println("Update "+namaTable+" set "+namaKolom+"= " +
+                String query="Update "+namaTable+" set "+namaKolom+"= " +
                             (retVal instanceof Number || retVal instanceof Double || retVal instanceof Integer? 
                             retVal: "'"+retVal.toString()+"' "
-                            + "whereee  ??????") );
+                            + getUpdateCriteria()) ;
+                System.out.println(query);
+                try{
+                    int i=conn.createStatement().executeUpdate(query);
+                    if(i>0){
+                        System.out.println("Update kolom sukses!");
+                    }
+                }catch(SQLException se){
+                    JOptionPane.showMessageDialog(null, se.getMessage());
+                }
                 //table
                 return retVal;
             } catch (Exception e) {
